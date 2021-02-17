@@ -16,8 +16,9 @@ client.on('ready', () => {
 
 
 client.on('message', msg => {
-	if (msg.content.includes('main(void)')) {
-		msg.reply('You are a C program!!!');
-		msg.channel.send('You are a C Program!!!');
+	if (formatter.installed() && msg.channel.id == process.env.CHANNEL) {
+		formatter.getFormattedCode(msg.content).then(code => msg.reply("\n```cpp\n" + code + "\n```")).catch(error => doSomething(error));
+	
 	}
+
 });
