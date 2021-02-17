@@ -2,4 +2,3 @@
 
 const formatter = require('./formatter');
 
-formatter.init();
