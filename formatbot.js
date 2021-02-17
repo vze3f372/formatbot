@@ -1,7 +1,9 @@
+require('dotenv').config();
 const Discord = require('discord.js');
 const client = new Discord.Client();
+const TOKEN = process.env.TOKEN;
 
-client.login('ODExNTI4ODU5MTY5MzI1MDc2.YCzhJQ.3nYxpLM0freM6BX37fhSIxH68_o');
+client.login(TOKEN);
 
 client.on('ready', () => {
 	  console.info(`Logged in as formatbot!`);
