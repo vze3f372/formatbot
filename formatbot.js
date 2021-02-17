@@ -17,7 +17,7 @@ client.on('ready', () => {
 
 client.on('message', msg => {
 	if (formatter.installed() && msg.channel.id == process.env.CHANNEL) {
-		formatter.getFormattedCode(msg.content).then(code => msg.reply("\n```cpp\n" + code + "\n```")).catch(error => doSomething(error));
+		formatter.getFormattedCode(msg.content).then(code => msg.reply("\n```cpp\n" + code + "\n```")).catch(error => console.error());
 	
 	}
 
