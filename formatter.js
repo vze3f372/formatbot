@@ -9,7 +9,6 @@
 
 
 const childProcess = require('child_process');
-// clang -fsyntax-only -x c++ -
 
 
 function installed() {
