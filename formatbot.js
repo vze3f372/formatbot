@@ -11,8 +11,8 @@ client.on('ready', () => {
 
 
 client.on('message', msg => {
-	  if (msg.content === 'ping') {
-		      msg.reply('pong');
-		      msg.channel.send('pong');
+	  if (msg.content.includes('main(void)')) {
+		      msg.reply('You are a C program!!!');
+		      msg.channel.send('You are a C Program!!!');
 		    }
 });
