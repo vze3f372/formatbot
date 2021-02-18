@@ -6,6 +6,7 @@ const client = new Discord.Client();
 
 const TOKEN = process.env.TOKEN;
 const formatter = require('./formatter');
+const syntaxChecker = require('./syntax-checker');
 
 
 client.login(TOKEN);
