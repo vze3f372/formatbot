@@ -1,13 +1,13 @@
 'use strict';
 
 /* Usage
- * First run installed() to check whether clang-format is installed and usable.
+ * First run installed() to check whether formatter is installed and usable.
  * If everything is fine, the function should return true.
  *
  * To get formatted code, call format() with the unformatted code and wait until it resolves.
  * To format a file, call formatFromFile() and wait until it resolves.
  *
- * Both functions reject if clang-format fails.
+ * Both functions reject if formatter fails.
  */
 
 
@@ -44,7 +44,7 @@ function format(code) {
 		formatProcess.stdin.write(code);
 		formatProcess.stdin.end();
 
-		handleFormatterOutput(formatProcess, resolve, reject);
+		handleProcessOutputAndExit(formatProcess, resolve, reject);
 	});
 }
 
@@ -54,12 +54,12 @@ function formatFile(filePath) {
 		const formatProcess = childProcess.exec('clang-format ' +
 			path.resolve(__dirname, filePath));
 
-		handleFormatterOutput(formatProcess, resolve, reject);
+		handleProcessOutputAndExit(formatProcess, resolve, reject);
 	});
 }
 
 
-function handleFormatterOutput(formatProcess, resolve, reject) {
+function handleProcessOutputAndExit(formatProcess, resolve, reject) {
 	let formattedCode = '';
 	let err = '';
 

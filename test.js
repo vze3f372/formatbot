@@ -43,6 +43,9 @@ setViewName(View
 	console.log('Checking clang support:', await syntaxChecker.installed());
 	console.log('Trying to compile sample code...');
 	syntaxChecker.checkCode(`
+	#include <cstdio>
+	#include <iostream>
+	
 	int main() {
 		return 0;
 	}
