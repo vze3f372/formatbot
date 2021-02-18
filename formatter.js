@@ -1,8 +1,6 @@
 'use strict';
 
 /* Usage
- * First run installed() to check whether formatter is installed and usable.
- * If everything is fine, the function should return true.
  *
  * To get formatted code, call format() with the unformatted code and wait until it resolves with the result.
  * To format a file, call formatFromFile() and wait until it resolves.
@@ -13,29 +11,6 @@
 
 
 const childProcess = require('child_process');
-
-
-let formatterInstalled = null;
-
-
-function init() {
-	return new Promise(resolve => {
-		childProcess.exec('clang-format --version', err => {
-			resolve(formatterInstalled = !err);
-		});
-	});
-}
-
-
-function installed() {
-	return new Promise(resolve => {
-		if (formatterInstalled === null) {
-			init().then(res => resolve(res));
-		} else {
-			resolve(formatterInstalled);
-		}
-	});
-}
 
 
 function format(code) {
@@ -76,7 +51,6 @@ function handleProcessOutputAndExit(formatProcess, resolve, reject) {
 
 
 module.exports = {
-	installed,
 	format,
 	formatFile
 };

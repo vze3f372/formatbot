@@ -6,7 +6,6 @@ const syntaxChecker = require('../syntax-checker');
 
 (async () => {
 	console.log('\n\nChecking formatter...');
-	console.log('Checking clang-format support:', await formatter.installed());
 	console.log('Trying to format sample code...');
 	console.log('Result:', await formatter.format(`#include "ardUI.h"
 
@@ -40,7 +39,6 @@ setViewName(View
 		.catch(err => console.error('Failed, reason:', err)));
 
 	console.log('\n\nChecking compiler...');
-	console.log('Checking clang support:', await syntaxChecker.installed());
 	console.log('Trying to compile sample code...');
 	await syntaxChecker.checkCode(`
 	#include <cstdio>

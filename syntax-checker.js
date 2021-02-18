@@ -1,17 +1,14 @@
 'use strict';
 
 /* Usage
- * First run installed() to check whether the compiler is installed and the library can be used.
- * If it returns true, you may continue.
  *
  * To check a single file or code string, just call checkCode() or checkFiles(). These functions will resolve with no
  * value if compilation succeeded and reject with a compiler output if the input code contains errors.
  * checkFiles() will compile all C and C++ files located in the directory specified by the argument.
  *
- * To use projects, please first scan for projects with loadProjects(). The function will return true if it finds
- * at least one project.
+ * To use projects, please first add a project directory with a makefile.
  * After that, you can compile the code using all the custom libraries in the project. Functions checkProjectCode()
- * and checkProjectFiles() work in the same way as non-project ones, except that they also need a project name as
+ * and checkProjectFiles() work in the same way as non-project ones, except that they also need a makefile path as
  * the first argument.
  *
  * Please always use absolute paths!
@@ -19,35 +16,6 @@
 
 const childProcess = require('child_process');
 const fs = require('fs');
-
-
-let compilerInstalled = null;
-const projects = [];
-
-
-function init() {
-	return new Promise(resolve => {
-		childProcess.exec('clang -v', err => {
-			resolve(compilerInstalled = !err);
-		});
-	});
-}
-
-
-function installed() {
-	return new Promise(resolve => {
-		if (compilerInstalled === null) {
-			init().then(() => resolve(compilerInstalled));
-		} else {
-			resolve(compilerInstalled);
-		}
-	});
-}
-
-
-function loadProjects(basePath) {
-
-}
 
 
 function checkCode(code) {
@@ -72,16 +40,16 @@ function checkFiles(dirPath) {
 }
 
 
-function checkProjectCode(projectName, code) {
+function checkProjectCode(makefilePath, code) {
 	return new Promise((resolve, reject) => {
-		projects.length? resolve() : reject();
+		makefilePath? resolve() : reject();
 	});
 }
 
 
-function checkProjectFiles(projectName, dirPath) {
+function checkProjectFiles(makefilePath, dirPath) {
 	return new Promise((resolve, reject) => {
-		projects.length? resolve() : reject();
+		makefilePath? resolve() : reject();
 	});
 }
 
@@ -104,11 +72,8 @@ function handleCompilerOutput(compilerProcess, resolve, reject) {
 
 
 module.exports = {
-	installed,
 	checkCode,
 	checkFiles,
-	// The following functions are only needed when working with projects
-	loadProjects,
 	checkProjectCode,
 	checkProjectFiles
 };
