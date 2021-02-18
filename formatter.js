@@ -14,16 +14,15 @@
 const childProcess = require('child_process');
 const path = require('path');
 
+
 let formatterInstalled = null;
 
 
 function init() {
 	return new Promise(resolve => {
-		const formatProcess = childProcess.exec('clang-format', err => {
+		childProcess.exec('clang-format --version', err => {
 			resolve(formatterInstalled = !err);
 		});
-
-		formatProcess.stdin.end();
 	});
 }
 
@@ -45,7 +44,7 @@ function format(code) {
 		formatProcess.stdin.write(code);
 		formatProcess.stdin.end();
 
-		handleProcessOutputAndExit(formatProcess, resolve, reject);
+		handleFormatterOutput(formatProcess, resolve, reject);
 	});
 }
 
@@ -55,12 +54,12 @@ function formatFile(filePath) {
 		const formatProcess = childProcess.exec('clang-format ' +
 			path.resolve(__dirname, filePath));
 
-		handleProcessOutputAndExit(formatProcess, resolve, reject);
+		handleFormatterOutput(formatProcess, resolve, reject);
 	});
 }
 
 
-function handleProcessOutputAndExit(formatProcess, resolve, reject) {
+function handleFormatterOutput(formatProcess, resolve, reject) {
 	let formattedCode = '';
 	let err = '';
 

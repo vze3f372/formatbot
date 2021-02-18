@@ -1,20 +1,19 @@
 'use strict';
 
-// clang -fsyntax-only -x c++ -
-
 const childProcess = require('child_process');
+const fs = require('fs');
 const path = require('path');
 
+
 let compilerInstalled = null;
+const projects = {};
 
 
 function init() {
 	return new Promise(resolve => {
-		const formatProcess = childProcess.exec('clang', err => {
+		childProcess.exec('clang -v', err => {
 			resolve(compilerInstalled = !err);
 		});
-
-		formatProcess.stdin.end();
 	});
 }
 
@@ -30,16 +29,42 @@ function installed() {
 }
 
 
+function loadProjects(basePath) {
+
+}
+
+
 function checkCode(code) {
 	return new Promise((resolve, reject) => {
+		const compilerProcess = childProcess.exec('clang -fsyntax-only -x c++ -');
+		compilerProcess.stdin.write(code);
+		compilerProcess.stdin.end();
 
+		handleCompilerOutput(compilerProcess, resolve, reject);
 	});
 }
 
 
-function checkDirectory(buildDirectory) {
+function checkProject(projectName) {
 	return new Promise((resolve, reject) => {
-		buildDirectory? resolve() : reject();
+		projectName? resolve() : reject();
+	});
+}
+
+
+function handleCompilerOutput(compilerProcess, resolve, reject) {
+	let formattedCode = '';
+	let err = '';
+
+	compilerProcess.stdout.on('data', chunk => formattedCode += chunk);
+	compilerProcess.stderr.on('data', chunk => err += chunk);
+
+	compilerProcess.on('close', exitCode => {
+		if (!exitCode) {
+			resolve();
+		} else {
+			reject(err);
+		}
 	});
 }
 
@@ -47,5 +72,5 @@ function checkDirectory(buildDirectory) {
 module.exports = {
 	installed,
 	checkCode,
-	checkDirectory
+	checkProject
 };
