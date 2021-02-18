@@ -13,11 +13,12 @@
  * After that, you can compile the code using all the custom libraries in the project. Functions checkProjectCode()
  * and checkProjectFiles() work in the same way as non-project ones, except that they also need a project name as
  * the first argument.
+ *
+ * Please always use absolute paths!
  */
 
 const childProcess = require('child_process');
 const fs = require('fs');
-const path = require('path');
 
 
 let compilerInstalled = null;
@@ -60,10 +61,11 @@ function checkCode(code) {
 }
 
 
-function checkFiles(basePath) {
+function checkFiles(dirPath) {
 	return new Promise((resolve, reject) => {
-		const compilerProcess = childProcess.exec('clang -fsyntax-only ' +
-		path.resolve(__dirname, basePath) + '*.cpp *.c');
+		const compilerProcess = childProcess.exec('shopt -s nullglob; clang -fsyntax-only '
+			+ dirPath + '/*.c ' + dirPath + '/*.cpp', {shell: '/bin/bash'});
+		// TODO: find a way to ignore empty wilcards in sh
 
 		handleCompilerOutput(compilerProcess, resolve, reject);
 	});
@@ -77,7 +79,7 @@ function checkProjectCode(projectName, code) {
 }
 
 
-function checkProjectFiles(projectName, uploadPath) {
+function checkProjectFiles(projectName, dirPath) {
 	return new Promise((resolve, reject) => {
 		projects.length? resolve() : reject();
 	});

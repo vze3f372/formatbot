@@ -1,7 +1,7 @@
 'use strict';
 
-const formatter = require('./formatter');
-const syntaxChecker = require('./syntax-checker');
+const formatter = require('../formatter');
+const syntaxChecker = require('../syntax-checker');
 
 
 (async () => {
@@ -42,7 +42,7 @@ setViewName(View
 	console.log('\n\nChecking compiler...');
 	console.log('Checking clang support:', await syntaxChecker.installed());
 	console.log('Trying to compile sample code...');
-	syntaxChecker.checkCode(`
+	await syntaxChecker.checkCode(`
 	#include <cstdio>
 	#include <iostream>
 	
@@ -51,5 +51,10 @@ setViewName(View
 	}
 	`)
 		.then(() => console.log('Success!'))
-		.catch(err => console.error('Failed to compile sample code:', err));
+		.catch(err => console.error('Failed, reason:', err));
+
+	console.log('Trying to compile sample file...');
+	await syntaxChecker.checkFiles(__dirname)
+		.then(() => console.log('Success!'))
+		.catch(err => console.error('Failed, reason:', err));
 })();

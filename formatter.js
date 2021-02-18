@@ -4,15 +4,15 @@
  * First run installed() to check whether formatter is installed and usable.
  * If everything is fine, the function should return true.
  *
- * To get formatted code, call format() with the unformatted code and wait until it resolves.
+ * To get formatted code, call format() with the unformatted code and wait until it resolves with the result.
  * To format a file, call formatFromFile() and wait until it resolves.
- *
  * Both functions reject if formatter fails.
+ *
+ * Please always use absolute paths!
  */
 
 
 const childProcess = require('child_process');
-const path = require('path');
 
 
 let formatterInstalled = null;
@@ -51,8 +51,7 @@ function format(code) {
 
 function formatFile(filePath) {
 	return new Promise((resolve, reject) => {
-		const formatProcess = childProcess.exec('clang-format ' +
-			path.resolve(__dirname, filePath));
+		const formatProcess = childProcess.exec('clang-format ' + filePath);
 
 		handleProcessOutputAndExit(formatProcess, resolve, reject);
 	});
