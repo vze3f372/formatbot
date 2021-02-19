@@ -10,11 +10,9 @@ WORKDIR /app
 COPY ["package.json", "package-lock.json*", "./"]
 
 RUN apt update
-RUN apt -y  install clang
-RUN apt -y install clang-format
+RUN apt -y  install clang clang-format build-essential
+
 RUN npm install
-RUN npm install dotenv
-RUN npm install discord.js
 
 COPY . .
 
