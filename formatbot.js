@@ -1,3 +1,4 @@
+
 'use strict';
 
 require('dotenv').config();
@@ -19,7 +20,8 @@ client.on('ready', () => {
 client.on('message', msg => {
 	if(formatter.installed() && msg.author.id === client.user.id) return;
 	if (msg.channel.id == process.env.CHANNEL) {
-		formatter.format(msg.content).then(code => msg.reply("\n```cpp\n" + code + "\n```")).catch(error => console.error());
+		formatter.format(msg.content).then(code => {msg.delete();
+		msg.reply("\n```cpp\n" + code + "\n```")}).catch(error => console.error());
 	
 	}
 

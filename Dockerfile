@@ -10,7 +10,9 @@ WORKDIR /app
 COPY ["package.json", "package-lock.json*", "./"]
 
 RUN apt update
-RUN apt -y  install clang clang-format build-essential
+RUN apt -y  install clang clang-format build-essential git zip
+
+
 
 RUN npm install
 
