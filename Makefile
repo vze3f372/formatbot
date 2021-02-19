@@ -17,17 +17,14 @@ MQTT_H  = MQTTCLIENT_PLATFORM_HEADER=MQTTFreeRTOS.h
 CC       := clang
 CFLAGS   = -Wall -fsyntax-only -I$(ZUMOLIB) -I$(FREERTOSINC) -I$(FREERTOSARMCM3) -I$(MQTTCLIENTSOURCE) -I$(MQTTFREERTOS) -I$(MQTTPACKETSOURCE) -I$(GENSOURCEPSOC) -D$(DEBUG) -D$(MQTT_T) -D$(MQTT_H)
 LDFLAGS  =
-SOURCE   = $(wildcard *.c)
+SOURCE   = $(wildcard *.c) $(wildcard *.cpp)
 OBJFILES = $(SOURCE:.c=.o)
-TARGET   = testapp
+TARGET   = PSOC
 
 all: $(TARGET)
 
-$(TARGET): $(OBJFILES)
+$(TARGET):
 	$(CC) $(CFLAGS) $(SOURCE) $(LDFLAGS)
-
-PSOC: 
-	$(CC) $(CFLAGS) $(SOURCE) $(LDFLAGS) 
-
+ 
 clean:
 	rm -f $(OBJFILES) 
