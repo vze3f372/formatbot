@@ -23,29 +23,36 @@ configurer.load().then(config => {
 		console.info(`Logged in as formatbot!`);
 	});
 
-	client.on('message', msg => {
-		if (msg.author.id === client.user.id) {
+	client.on('message', message => {
+		if (message.author.id === client.user.id) {
 			// Message sent by the bot, ignoring
-		} else if (!config.channels.some(channel => channel.id === msg.channel.id)) {
+		} else if (!config.channels.includes(message.channel.id)) {
 			// Channel not added, ignoring
 		} else {
-			msg.reply('Working, please wait...').then(reply => {
-				msg.delete();
+			message.reply('Working, please wait...').then(reply => {
+				message.delete();
 
-				formatter.format(msg.content).then(code => {
+				formatter.format(message.content).then(code => {
 					const replyContent =
-						'<@' + msg.author.id + '>,' +
+						'<@' + message.author.id + '>, Your code:' +
 						'```cpp\n' +
 						code + '\n' +
 						'```\n';
 					reply.edit(replyContent + 'Building...');
 
-					syntaxChecker.checkCode(msg.content)
+					const project = config.projects.find(p => p.channels.includes(message.channel.id));
+					let promise;
+					if (project) {
+						promise = syntaxChecker.checkProject(project.root, message.content);
+					} else {
+						promise = syntaxChecker.checkCode(message.content);
+					}
+					promise
 						.then(warnings => reply.edit(replyContent +
 							'Build successful! Warnings:\n' + (warnings || 'None!')))
 						.catch(err => reply.edit(replyContent + 'Build failed:\n' + err));
 				}).catch(err => {
-					msg.reply('Failed to format the message:\n' + msg.content + '\n' +
+					message.reply('Failed to format the message:\n' + message.content + '\n' +
 						'Reason: ' + err);
 				});
 			});
