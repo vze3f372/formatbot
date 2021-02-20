@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Test tools" type="NodeJSConfigurationType" folderName="Test" path-to-node="wsl://Ubuntu-20.04@/usr/bin/node" path-to-js-file="test.js" working-dir="$PROJECT_DIR$/test">
+    <method v="2" />
+  </configuration>
+</component>
