@@ -8,19 +8,19 @@
  *
  * To use projects, please first add a project directory with a makefile.
  * After that, you can compile the code using all the custom libraries in the project. Functions checkProjectCode()
- * and checkProjectFiles() work in the same way as non-project ones, except that they also need a makefile path as
- * the first argument.
+ * and checkProject() work in the same way as non-project ones, except that they also need the project directory
+ * path as the first argument.
  *
  * Please always use absolute paths!
  */
 
 const childProcess = require('child_process');
-const fs = require('fs');
 
 
 function checkCode(code) {
 	return new Promise((resolve, reject) => {
-		const compilerProcess = childProcess.exec('clang -fsyntax-only -x c++ -');
+		const compilerProcess = childProcess.exec('clang -fsyntax-only -x c++ -',
+			{uid: 1500, gid: 1500});
 		compilerProcess.stdin.write(code);
 		compilerProcess.stdin.end();
 
@@ -29,27 +29,27 @@ function checkCode(code) {
 }
 
 
-function checkFiles(dirPath) {
+function checkProjectCode(projectPath, code) {
 	return new Promise((resolve, reject) => {
-		const compilerProcess = childProcess.exec('shopt -s nullglob; clang -fsyntax-only '
-			+ dirPath + '/*.c ' + dirPath + '/*.cpp', {shell: '/bin/bash'});
-		// TODO: find a way to ignore empty wilcards in sh
+		const makeProcess = childProcess.exec('make -C '
+			+ projectPath + ' -f ' + projectPath + '/Makefile',
+			{uid: 1500, gid: 1500});
 
-		handleCompilerOutput(compilerProcess, resolve, reject);
+		makeProcess.stdin.write(code);
+		makeProcess.stdin.end();
+
+		handleCompilerOutput(makeProcess, resolve, reject);
 	});
 }
 
 
-function checkProjectCode(makefilePath, code) {
+function checkProject(projectPath) {
 	return new Promise((resolve, reject) => {
-		makefilePath? resolve() : reject();
-	});
-}
+		const makeProcess = childProcess.exec('make -C '
+			+ projectPath + ' -f ' + projectPath + '/Makefile',
+			{uid: 1500, gid: 1500});
 
-
-function checkProjectFiles(makefilePath, dirPath) {
-	return new Promise((resolve, reject) => {
-		makefilePath? resolve() : reject();
+		handleCompilerOutput(makeProcess, resolve, reject);
 	});
 }
 
@@ -73,7 +73,6 @@ function handleCompilerOutput(compilerProcess, resolve, reject) {
 
 module.exports = {
 	checkCode,
-	checkFiles,
 	checkProjectCode,
-	checkProjectFiles
+	checkProject
 };

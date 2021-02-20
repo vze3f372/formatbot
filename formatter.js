@@ -15,7 +15,8 @@ const childProcess = require('child_process');
 
 function format(code) {
 	return new Promise((resolve, reject) => {
-		const formatProcess = childProcess.exec('clang-format');
+		const formatProcess = childProcess.exec('clang-format',
+			{uid: 1500, gid: 1500});
 		formatProcess.stdin.write(code);
 		formatProcess.stdin.end();
 
@@ -26,7 +27,8 @@ function format(code) {
 
 function formatFile(filePath) {
 	return new Promise((resolve, reject) => {
-		const formatProcess = childProcess.exec('clang-format ' + filePath);
+		const formatProcess = childProcess.exec('clang-format ' + filePath,
+			{uid: 1500, gid: 1500});
 
 		handleProcessOutputAndExit(formatProcess, resolve, reject);
 	});

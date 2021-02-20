@@ -1,5 +1,7 @@
 'use strict';
 
+const path = require('path');
+
 const formatter = require('../formatter');
 const syntaxChecker = require('../syntax-checker');
 
@@ -51,8 +53,8 @@ setViewName(View
 		.then(() => console.log('Success!'))
 		.catch(err => console.error('Failed, reason:', err));
 
-	console.log('Trying to compile sample file...');
-	await syntaxChecker.checkFiles(__dirname)
+	console.log('Trying to compile sample Make project...');
+	await syntaxChecker.checkProject(path.resolve(__dirname, '..', 'projects', 'empty'))
 		.then(() => console.log('Success!'))
 		.catch(err => console.error('Failed, reason:', err));
 })();
