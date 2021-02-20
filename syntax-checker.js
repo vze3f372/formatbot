@@ -1,42 +1,26 @@
 'use strict';
 
+/* Usage
+ *
+ * To check a single file or code string, just call checkCode() or checkFiles(). These functions will resolve with no
+ * value if compilation succeeded and reject with a compiler output if the input code contains errors.
+ * checkFiles() will compile all C and C++ files located in the directory specified by the argument.
+ *
+ * To use projects, please first add a project directory with a makefile.
+ * After that, you can compile the code using all the custom libraries in the project. Functions checkProjectCode()
+ * and checkProject() work in the same way as non-project ones, except that they also need the project directory
+ * path as the first argument.
+ *
+ * Please always use absolute paths!
+ */
+
 const childProcess = require('child_process');
-const fs = require('fs');
-const path = require('path');
-
-
-let compilerInstalled = null;
-const projects = {};
-
-
-function init() {
-	return new Promise(resolve => {
-		childProcess.exec('clang -v', err => {
-			resolve(compilerInstalled = !err);
-		});
-	});
-}
-
-
-function installed() {
-	return new Promise(resolve => {
-		if (compilerInstalled === null) {
-			init().then(() => resolve(compilerInstalled));
-		} else {
-			resolve(compilerInstalled);
-		}
-	});
-}
-
-
-function loadProjects(basePath) {
-
-}
 
 
 function checkCode(code) {
 	return new Promise((resolve, reject) => {
-		const compilerProcess = childProcess.exec('clang -fsyntax-only -x c++ -');
+		const compilerProcess = childProcess.exec('clang -fsyntax-only -x c++ -',
+			{uid: 1500, gid: 1500});
 		compilerProcess.stdin.write(code);
 		compilerProcess.stdin.end();
 
@@ -45,9 +29,27 @@ function checkCode(code) {
 }
 
 
-function checkProject(projectName) {
+function checkProjectCode(projectPath, code) {
 	return new Promise((resolve, reject) => {
-		projectName? resolve() : reject();
+		const makeProcess = childProcess.exec('make -C '
+			+ projectPath + ' -f ' + projectPath + '/Makefile',
+			{uid: 1500, gid: 1500});
+
+		makeProcess.stdin.write(code);
+		makeProcess.stdin.end();
+
+		handleCompilerOutput(makeProcess, resolve, reject);
+	});
+}
+
+
+function checkProject(projectPath) {
+	return new Promise((resolve, reject) => {
+		const makeProcess = childProcess.exec('make -C '
+			+ projectPath + ' -f ' + projectPath + '/Makefile',
+			{uid: 1500, gid: 1500});
+
+		handleCompilerOutput(makeProcess, resolve, reject);
 	});
 }
 
@@ -70,7 +72,7 @@ function handleCompilerOutput(compilerProcess, resolve, reject) {
 
 
 module.exports = {
-	installed,
 	checkCode,
+	checkProjectCode,
 	checkProject
 };

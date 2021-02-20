@@ -1,65 +1,41 @@
 'use strict';
 
 /* Usage
- * First run installed() to check whether clang-format is installed and usable.
- * If everything is fine, the function should return true.
  *
- * To get formatted code, call format() with the unformatted code and wait until it resolves.
+ * To get formatted code, call format() with the unformatted code and wait until it resolves with the result.
  * To format a file, call formatFromFile() and wait until it resolves.
+ * Both functions reject if formatter fails.
  *
- * Both functions reject if clang-format fails.
+ * Please always use absolute paths!
  */
 
 
 const childProcess = require('child_process');
-const path = require('path');
-
-
-let formatterInstalled = null;
-
-
-function init() {
-	return new Promise(resolve => {
-		childProcess.exec('clang-format --version', err => {
-			resolve(formatterInstalled = !err);
-		});
-	});
-}
-
-
-function installed() {
-	return new Promise(resolve => {
-		if (formatterInstalled === null) {
-			init().then(res => resolve(res));
-		} else {
-			resolve(formatterInstalled);
-		}
-	});
-}
 
 
 function format(code) {
 	return new Promise((resolve, reject) => {
-		const formatProcess = childProcess.exec('clang-format');
+		const formatProcess = childProcess.exec('clang-format',
+			{uid: 1500, gid: 1500});
 		formatProcess.stdin.write(code);
 		formatProcess.stdin.end();
 
-		handleFormatterOutput(formatProcess, resolve, reject);
+		handleProcessOutputAndExit(formatProcess, resolve, reject);
 	});
 }
 
 
 function formatFile(filePath) {
 	return new Promise((resolve, reject) => {
-		const formatProcess = childProcess.exec('clang-format ' +
-			path.resolve(__dirname, filePath));
+		const formatProcess = childProcess.exec('clang-format ' + filePath,
+			{uid: 1500, gid: 1500});
 
-		handleFormatterOutput(formatProcess, resolve, reject);
+		handleProcessOutputAndExit(formatProcess, resolve, reject);
 	});
 }
 
 
-function handleFormatterOutput(formatProcess, resolve, reject) {
+function handleProcessOutputAndExit(formatProcess, resolve, reject) {
 	let formattedCode = '';
 	let err = '';
 
@@ -77,7 +53,6 @@ function handleFormatterOutput(formatProcess, resolve, reject) {
 
 
 module.exports = {
-	installed,
 	format,
 	formatFile
 };
