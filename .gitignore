@@ -8,6 +8,7 @@
 .LSOverride
 .env
 PSOC/
+config.json
 # Icon must end with two \r
 Icon
 
