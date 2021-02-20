@@ -1,0 +1,29 @@
+{
+	"token": "ODExNTI4ODU5MTY5MzI1MDc2.YCzhJQ.-YL0J6DpK7uQZR38cMZbeodvWaY",
+	"admins": [
+		"288178518691414017",
+		"255371734771826688"
+	],
+	"projects": [
+		{
+			"name": "zumo",
+			"root": "./projects/zumo",
+			"upload": "./projects/zumo/upload/"
+		},
+		{
+			"name": "empty",
+			"root": "./projects/empty",
+			"upload": "./projects/empty/upload/"
+		}
+	],
+	"channels": [
+		{
+			"id": "811930952137834507",
+			"project": "zumo"
+		},
+		{
+			"id": "812599761940381716",
+			"project": "empty"
+		}
+	]
+}
