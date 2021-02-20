@@ -1,7 +1,6 @@
 CC       := clang
 CFLAGS   = -Wall -fsyntax-only
-LDFLAGS  =
-SOURCE   = $(wildcard *.c) $(wildcard *.cpp)
+SOURCE   = $(wildcard ./upload/*.c) $(wildcard ./upload/*.cpp)
 TARGET   = testapp
 
 all: $(TARGET)

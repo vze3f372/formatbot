@@ -2,8 +2,8 @@
 
 const path = require('path');
 
-const formatter = require('../formatter');
-const syntaxChecker = require('../syntax-checker');
+const formatter = require('../lib/formatter');
+const syntaxChecker = require('../lib/syntax-checker');
 
 
 (async () => {
