@@ -7,18 +7,18 @@ WORKDIR /app
 
 COPY ["package.json", "package-lock.json*", "./"]
 RUN bash
-RUN apt update
-RUN apt -y  install clang clang-format build-essential git zip
+RUN apt-get update
+RUN apt-get -y  install apt-utils clang clang-format build-essential git zip
 RUN useradd -u 1500 bot
 RUN chmod ug+rx ./*
-RUN mkdir PSOC source_files
-RUN chmod gu+rwx  source_files
-RUN cd PSOC 
 RUN git clone https://github.com/vze3f372/zumoPreBuilt.git
-RUN chmod gu+rwx  ./PSOC
+RUN cp -r Zumo/* ./projects/zumo/
+RUN chmod gu+rwx ./projects/zumo/upload ./projects/empty/upload
+RUN rm -r Zumo
+
+RUN chmod gu+rwx  ./projects
 RUN npm install
 
 COPY . .
 
-CMD [ "id", "bot"]
 CMD [ "node", "formatbot.js" ]
