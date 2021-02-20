@@ -1,5 +1,7 @@
 'use strict';
 
+const path = require('path');
+
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
@@ -43,7 +45,7 @@ configurer.load().then(config => {
 					const project = config.projects.find(p => p.channels.includes(message.channel.id));
 					let promise;
 					if (project) {
-						promise = syntaxChecker.checkProject(project.root, message.content);
+						promise = syntaxChecker.checkProject(path.resolve(project.root), message.content);
 					} else {
 						promise = syntaxChecker.checkCode(message.content);
 					}
