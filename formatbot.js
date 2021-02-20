@@ -1,4 +1,3 @@
-
 'use strict';
 
 require('dotenv').config();
@@ -18,11 +17,33 @@ client.on('ready', () => {
 
 
 client.on('message', msg => {
-	if(formatter.installed() && msg.author.id === client.user.id) return;
-	if (msg.channel.id === process.env.CHANNEL) {
-		formatter.format(msg.content).then(code => {msg.delete();
-		msg.reply("\n```cpp\n" + code + "\n```")}).catch(error => console.error());
-	
+	if (msg.author.id === client.user.id) {
+		return;
 	}
 
+	if (msg.channel.id === process.env.CHANNEL) {
+		msg.reply('Working, please wait...')
+			.then(reply => {
+				msg.delete();
+
+				formatter.format(msg.content)
+					.then(code => {
+						const replyContent =
+							'<@' + msg.author.id + '>,' +
+							'```cpp\n' +
+							code + '\n' +
+							'```\n';
+						reply.edit(replyContent + 'Building...');
+
+						syntaxChecker.checkCode(msg.content)
+							.then(warnings => reply.edit(replyContent +
+								'Build successful! Warnings:\n' + (warnings || 'None!')))
+							.catch(err => reply.edit(replyContent + 'Build failed:\n' + err));
+					})
+					.catch(err => {
+						msg.reply('Failed to format the message:\n' + msg.content);
+						console.error('Failed to format the message:', msg.content, 'Reason:', err);
+					});
+			});
+	}
 });
