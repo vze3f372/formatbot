@@ -6,7 +6,7 @@ FROM node:current-stretch
 WORKDIR /app
 
 COPY ["package.json", "package-lock.json*", "./"]
-
+RUN bash
 RUN apt update
 RUN apt -y  install clang clang-format build-essential git zip
 RUN useradd -u 1500 bot
@@ -20,4 +20,5 @@ RUN npm install
 
 COPY . .
 
+CMD [ "id", "bot"]
 CMD [ "node", "formatbot.js" ]
