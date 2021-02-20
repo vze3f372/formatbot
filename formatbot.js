@@ -51,10 +51,12 @@ configurer.load().then(config => {
 					}
 					promise
 						.then(warnings => reply.edit(replyContent +
-							'Build successful! Warnings:\n' + (warnings || 'None!')))
-						.catch(err => reply.edit(replyContent + 'Build failed:\n' + err));
+							':white_check_mark:  Build successful! Warnings:\n' + (warnings || 'None!')))
+						.catch(err => reply.edit(replyContent + ':no_entry:  Build failed:\n' + err));
 				}).catch(err => {
-					message.reply('Failed to format the message:\n' + message.content + '\n' +
+					message.reply(':warning:'.repeat(3) +
+						' Failed to format the message:\n' +
+						message.content + '\n' +
 						'Reason: ' + err);
 				});
 			});
