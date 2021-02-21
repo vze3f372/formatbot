@@ -8,9 +8,9 @@ const formatter = require('./lib/formatter');
 const files = require('./lib/file-manager');
 const syntaxChecker = require('./lib/syntax-checker');
 
-const config = configurer();
+const configFile = configurer();
 
-config.setDefaults({
+configFile.setDefaults({
 	token: 'your_token_here',
 	admins: [],
 	projects: [],
@@ -18,11 +18,11 @@ config.setDefaults({
 });
 
 
-config.load().then(config => {
+configFile.load().then(config => {
 	client.login(config.token);
 
 	client.on('ready', () => {
-		console.info(`Logged in as formatbot!`);
+		console.info(`Logged in as FormatBot!`);
 	});
 
 	client.on('message', message => {
@@ -36,7 +36,8 @@ config.load().then(config => {
 		} else if (!config.channels.includes(message.channel.id)) {
 			// Channel not added, ignoring
 		} else {
-			message.reply('Working, please wait...').then(reply => {
+			const attachments = message.attachments.array();
+			message.channel.send('Working, please wait...', attachments).then(reply => {
 				formatter.format(message.content).then(code => {
 					const replyContent =
 						'<@' + message.author.id + '>, Your code:' +
@@ -45,40 +46,37 @@ config.load().then(config => {
 						'```\n';
 					reply.edit(replyContent + 'Building...');
 
-					const project = config.projects.find(p => p.channels.includes(message.channel.id));
 					let promise;
-					if (project) {
-						if (message.attachments.size) {
-							const sourceFile = message.attachments.find(a => a.url.match(/.*\.c(pp)?$/));
-							const sourceArchive = message.attachments.find(a => a.url.match(/.*\.zip$/));
+					const project = config.projects.find(p => p.channels.includes(message.channel.id)) ??
+						config.projects.find(p => p.name === 'empty');
 
-							if (sourceFile.url) {
-								promise = files.cleanDirectory(project.upload)
-									.then(() => files.downloadFile(sourceFile.url, project.upload))
-									.then(() => syntaxChecker.checkProject(project.root))
-									.then(() => message.delete());
-							}
+					if (attachments.length) {
+						const sourceFile = attachments.find(a => a.url.match(/.*\.c(pp)?$/));
+						const sourceArchive = attachments.find(a => a.url.match(/.*\.zip$/));
+
+						if (sourceFile) {
+							promise = files.cleanDirectory(project.upload)
+								.then(() => files.downloadFile(sourceFile.url, project.upload))
+								.then(() => syntaxChecker.checkProject(project.root));
+						} else if (sourceArchive) {
+							// download, unarchive, build
+							promise = new Promise((resolve, reject) => reject('Archives are not yet supported'));
 						} else {
-							promise = new Promise((resolve, reject) => reject('Please upload a file ' +
-								'or .zip archive with your code'));
+							promise = new Promise((resolve, reject) => reject('File type not supported'));
 						}
 					} else {
-						if (message.attachments.size) {
-							promise = new Promise((resolve, reject) => reject('This channel does not support files'));
-						} else {
-							promise = syntaxChecker.checkCode(message.content);
-						}
+						promise = syntaxChecker.checkCode(message.content);
 					}
 					promise
 						.then(warnings => reply.edit(replyContent +
 							':white_check_mark:  Build successful! Warnings:\n' + (warnings || 'None!')))
 						.catch(err => reply.edit(replyContent + ':no_entry:  Build failed:\n' + err));
-				}).catch(err => {
-					message.reply(':warning:'.repeat(3) +
-						' Failed to format the message:\n' +
-						message.content + '\n' +
-						'Reason: ' + err);
-				});
+				})
+					.catch(err => reply.edit('<@' + message.author.id + '>, Your message: \n"' +
+						message.content + '"\n' +
+						':warning:  Could not be formatted!\n' +
+						'Reason: ' + err))
+					.then(() => message.delete());
 			});
 		}
 	});
