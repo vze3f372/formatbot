@@ -28,11 +28,44 @@ configFile.load().then(config => {
 	client.on('message', message => {
 		if (message.author.id === client.user.id) {
 			// Message sent by the bot, ignoring
-		} else if (message.content.startsWith('!')) {
-			if (config.admins.includes(message.author.id)) {
-				// Handle admin commands
+		} else if (message.content.startsWith('!formatbot ')) {
+			const commands = [
+				{
+					name: 'add',
+					admin: true,
+					cb: () => {
+						if (!config.channels.includes(message.channel.id)) {
+							config.channels.push(message.channel.id);
+						}
+						configFile.save(config);
+						message.reply('Channel added!');
+					}
+				},
+				{
+					name: 'remove',
+					admin: true,
+					cb: () => {
+						config.channels.splice(config.channels.indexOf(message.channel.id));
+						configFile.save(config);
+						message.reply('Channel removed!');
+					}
+				},
+				{
+					name: 'help',
+					cb: () => {
+						message.reply('very helpful help page');
+					}
+				}
+			];
+			const words = message.content.match(/\b\w+\b/g);
+			const command = commands.find(c => c.name === words[1]);
+			if (!command) {
+				message.reply('Command not found');
+			} else if (command.admin && !config.admins.includes(message.author.id)) {
+				message.reply('This command requires admin permissions')
+			} else {
+				command.cb();
 			}
-			// Handle user commands
 		} else if (!config.channels.includes(message.channel.id)) {
 			// Channel not added, ignoring
 		} else {
