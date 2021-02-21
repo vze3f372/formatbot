@@ -45,9 +45,22 @@ configurer.load().then(config => {
 					const project = config.projects.find(p => p.channels.includes(message.channel.id));
 					let promise;
 					if (project) {
-						promise = syntaxChecker.checkProject(path.resolve(project.root), message.content);
+						if (message.attachments.size) {
+							const sourceFiles = message.attachments.filter(a => a.url.match(/.*\.c(pp)?$/));
+							const archive = message.attachments.find(a => a.url.match(/.*\.zip$/));
+
+							// downloadFile
+							promise = syntaxChecker.checkProject(path.resolve(project.root), message.content);
+						} else {
+							promise = new Promise((resolve, reject) => reject('Please upload a file ' +
+								'or .zip archive with your code'));
+						}
 					} else {
-						promise = syntaxChecker.checkCode(message.content);
+						if (message.attachments.size) {
+							promise = new Promise((resolve, reject) => reject('Project not found'));
+						} else {
+							promise = syntaxChecker.checkCode(message.content);
+						}
 					}
 					promise
 						.then(warnings => reply.edit(replyContent +
