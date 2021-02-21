@@ -1,0 +1,4 @@
+# Ignore all project files, except empty project's makefile
+
+/*/**
+!/empty/Makefile
