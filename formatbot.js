@@ -1,12 +1,11 @@
 'use strict';
 
-const path = require('path');
-
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
 const configurer = require('./lib/configurer');
 const formatter = require('./lib/formatter');
+const files = require('./lib/file-manager');
 const syntaxChecker = require('./lib/syntax-checker');
 
 
@@ -32,8 +31,6 @@ configurer.load().then(config => {
 			// Channel not added, ignoring
 		} else {
 			message.reply('Working, please wait...').then(reply => {
-				message.delete();
-
 				formatter.format(message.content).then(code => {
 					const replyContent =
 						'<@' + message.author.id + '>, Your code:' +
@@ -46,18 +43,22 @@ configurer.load().then(config => {
 					let promise;
 					if (project) {
 						if (message.attachments.size) {
-							const sourceFiles = message.attachments.filter(a => a.url.match(/.*\.c(pp)?$/));
-							const archive = message.attachments.find(a => a.url.match(/.*\.zip$/));
+							const sourceFile = message.attachments.find(a => a.url.match(/.*\.c(pp)?$/));
+							const sourceArchive = message.attachments.find(a => a.url.match(/.*\.zip$/));
 
-							// downloadFile
-							promise = syntaxChecker.checkProject(path.resolve(project.root), message.content);
+							if (sourceFile.url) {
+								promise = files.cleanDirectory(project.upload)
+									.then(() => files.downloadFile(sourceFile.url, project.upload))
+									.then(() => syntaxChecker.checkProject(project.root))
+									.then(() => message.delete());
+							}
 						} else {
 							promise = new Promise((resolve, reject) => reject('Please upload a file ' +
 								'or .zip archive with your code'));
 						}
 					} else {
 						if (message.attachments.size) {
-							promise = new Promise((resolve, reject) => reject('Project not found'));
+							promise = new Promise((resolve, reject) => reject('This channel does not support files'));
 						} else {
 							promise = syntaxChecker.checkCode(message.content);
 						}
