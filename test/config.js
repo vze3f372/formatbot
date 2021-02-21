@@ -2,17 +2,19 @@
 
 const configurer = require('../lib/configurer');
 
-configurer.setDefaults({
+const config = configurer('./options.json');
+
+
+config.setDefaults({
 	number: 1,
 	string: 'hello',
 	object: {a: 1},
 	null: null
 });
-configurer.setFilePath('./options.json');
 
 
-configurer.save({})
+config.save({})
 	.then(() => {
-		configurer.load();
+		config.load();
 	})
 	.then(options => console.log(options));

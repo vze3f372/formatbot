@@ -5,10 +5,12 @@ const client = new Discord.Client();
 
 const configurer = require('./lib/configurer');
 const formatter = require('./lib/formatter');
+const files = require('./lib/file-manager');
 const syntaxChecker = require('./lib/syntax-checker');
 
+const config = configurer();
 
-configurer.setDefaults({
+config.setDefaults({
 	token: 'your_token_here',
 	admins: [],
 	projects: [],
@@ -16,36 +18,65 @@ configurer.setDefaults({
 });
 
 
-configurer.load().then(config => {
+config.load().then(config => {
 	client.login(config.token);
 
 	client.on('ready', () => {
 		console.info(`Logged in as formatbot!`);
 	});
 
-	client.on('message', msg => {
-		if (msg.author.id === client.user.id) {
+	client.on('message', message => {
+		if (message.author.id === client.user.id) {
 			// Message sent by the bot, ignoring
-		} else if (!config.channels.some(channel => channel.id === msg.channel.id)) {
+		} else if (message.content.startsWith('!')) {
+			if (config.admins.includes(message.author.id)) {
+				// Handle admin commands
+			}
+			// Handle user commands
+		} else if (!config.channels.includes(message.channel.id)) {
 			// Channel not added, ignoring
 		} else {
-			msg.reply('Working, please wait...').then(reply => {
-				msg.delete();
-
-				formatter.format(msg.content).then(code => {
+			message.reply('Working, please wait...').then(reply => {
+				formatter.format(message.content).then(code => {
 					const replyContent =
-						'<@' + msg.author.id + '>,' +
+						'<@' + message.author.id + '>, Your code:' +
 						'```cpp\n' +
 						code + '\n' +
 						'```\n';
 					reply.edit(replyContent + 'Building...');
 
-					syntaxChecker.checkCode(msg.content)
+					const project = config.projects.find(p => p.channels.includes(message.channel.id));
+					let promise;
+					if (project) {
+						if (message.attachments.size) {
+							const sourceFile = message.attachments.find(a => a.url.match(/.*\.c(pp)?$/));
+							const sourceArchive = message.attachments.find(a => a.url.match(/.*\.zip$/));
+
+							if (sourceFile.url) {
+								promise = files.cleanDirectory(project.upload)
+									.then(() => files.downloadFile(sourceFile.url, project.upload))
+									.then(() => syntaxChecker.checkProject(project.root))
+									.then(() => message.delete());
+							}
+						} else {
+							promise = new Promise((resolve, reject) => reject('Please upload a file ' +
+								'or .zip archive with your code'));
+						}
+					} else {
+						if (message.attachments.size) {
+							promise = new Promise((resolve, reject) => reject('This channel does not support files'));
+						} else {
+							promise = syntaxChecker.checkCode(message.content);
+						}
+					}
+					promise
 						.then(warnings => reply.edit(replyContent +
-							'Build successful! Warnings:\n' + (warnings || 'None!')))
-						.catch(err => reply.edit(replyContent + 'Build failed:\n' + err));
+							':white_check_mark:  Build successful! Warnings:\n' + (warnings || 'None!')))
+						.catch(err => reply.edit(replyContent + ':no_entry:  Build failed:\n' + err));
 				}).catch(err => {
-					msg.reply('Failed to format the message:\n' + msg.content + '\n' +
+					message.reply(':warning:'.repeat(3) +
+						' Failed to format the message:\n' +
+						message.content + '\n' +
 						'Reason: ' + err);
 				});
 			});
