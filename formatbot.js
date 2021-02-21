@@ -8,8 +8,9 @@ const formatter = require('./lib/formatter');
 const files = require('./lib/file-manager');
 const syntaxChecker = require('./lib/syntax-checker');
 
+const config = configurer();
 
-configurer.setDefaults({
+config.setDefaults({
 	token: 'your_token_here',
 	admins: [],
 	projects: [],
@@ -17,7 +18,7 @@ configurer.setDefaults({
 });
 
 
-configurer.load().then(config => {
+config.load().then(config => {
 	client.login(config.token);
 
 	client.on('ready', () => {
@@ -27,6 +28,11 @@ configurer.load().then(config => {
 	client.on('message', message => {
 		if (message.author.id === client.user.id) {
 			// Message sent by the bot, ignoring
+		} else if (message.content.startsWith('!')) {
+			if (config.admins.includes(message.author.id)) {
+				// Handle admin commands
+			}
+			// Handle user commands
 		} else if (!config.channels.includes(message.channel.id)) {
 			// Channel not added, ignoring
 		} else {
