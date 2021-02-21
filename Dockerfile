@@ -9,11 +9,11 @@ COPY . .
 #Update apt and install required packages
 RUN apt-get update
 RUN apt-get -y  install\
-			apt-utils\
-			clang\
-			clang-format\
-			build-essential\
-			git zip
+        apt-utils\
+        clang\
+        clang-format\
+        build-essential\
+        git zip
 #Create a user and group for the bot to run
 RUN useradd -u 1500 bot
 #Manage the pre-build PSoC Zumo Project
