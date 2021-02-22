@@ -31,7 +31,7 @@ configFile.load().then(config => {
 		} else if (message.content.startsWith('!formatbot ')) {
 			const commands = [
 				{
-					name: 'add',
+					name: 'chadd',
 					admin: true,
 					cb: () => {
 						if (!config.channels.includes(message.channel.id)) {
@@ -42,7 +42,7 @@ configFile.load().then(config => {
 					}
 				},
 				{
-					name: 'remove',
+					name: 'chdel',
 					admin: true,
 					cb: () => {
 						config.channels.splice(config.channels.indexOf(message.channel.id));
@@ -51,9 +51,44 @@ configFile.load().then(config => {
 					}
 				},
 				{
+					name: 'chlist',
+					admin: true,
+					cb: () => {
+						message.reply('List of FormatBot channels:\n' +
+							config.channels.join('\n'));
+					}
+				},
+				{
+					name: 'admins',
+					admin: true,
+					cb: () => {
+						message.reply('List of FormatBot admins:\n' +
+							config.admins.join('\n'))
+					}
+				},
+				{
+					name: 'ahelp',
+					admin: true,
+					cb: () => {
+						message.reply('Admin commands help\n' +
+							'!formatbot chadd - Adds the current channel to FormatBot\n' +
+							'!formatbot chdel - Removes the current channel from FormatBot\n' +
+							'!formatbot chlist - Lists channels added to FormatBot\n' +
+							'!formatbot promote [id] - Sets user as admin\n' +
+							'!formatbot demote [id] - Removes the user from admins\n' +
+							'!formatbot admins - Lists all the admins of FormatBot' +
+							'!formatbot prset - Sets the project to use for current channel\n' +
+							'!formatbot ahelp - Shows this page\n' +
+							'!formatbot help - Shows user help page');
+					}
+				},
+				{
 					name: 'help',
 					cb: () => {
-						message.reply('very helpful help page');
+						message.reply('FormatBot help\n' +
+							'Just send me your code and I\'ll format it and check it for any errors!\n' +
+							'!formatbot help - Shows this page\n' +
+							'!formatbot ahelp - Shows admin help page');
 					}
 				}
 			];
