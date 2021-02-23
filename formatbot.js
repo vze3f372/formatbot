@@ -22,7 +22,7 @@ config.load().then(config => {
 	client.login(config.token);
 
 	client.on('ready', () => {
-		console.info(`Logged in as formatbot!`);
+		console.info(`Logged in as CodeBot!`);
 		for (const channelID of config.channels) {
 			client.channels.resolve(channelID)
 				.send(config.welcome[Math.floor(Math.random() * config.welcome.length)]);
@@ -32,7 +32,7 @@ config.load().then(config => {
 	client.on('message', message => {
 		if (message.author.id === client.user.id) {
 			// Message sent by the bot, ignoring
-		} else if (message.content.startsWith('!formatbot ')) {
+		} else if (message.content.startsWith('!codebot ')) {
 			const words = message.content.match(/\b\w+\b/g);
 			const commands = [
 				{
@@ -59,7 +59,7 @@ config.load().then(config => {
 					name: 'chlist',
 					admin: true,
 					cb: () => {
-						message.reply('List of FormatBot channels:\n' +
+						message.reply('List of CodeBot channels:\n' +
 							config.channels.join('\n'));
 					}
 				},
@@ -106,7 +106,7 @@ config.load().then(config => {
 					name: 'admins',
 					admin: true,
 					cb: () => {
-						message.reply('List of FormatBot admins:\n' +
+						message.reply('List of CodeBot admins:\n' +
 							config.admins.join('\n'));
 					}
 				},
@@ -114,25 +114,25 @@ config.load().then(config => {
 					name: 'ahelp',
 					admin: true,
 					cb: () => {
-						message.reply('Admin commands help\n' +
-							'!formatbot chadd - Adds the current channel to FormatBot\n' +
-							'!formatbot chdel - Removes the current channel from FormatBot\n' +
-							'!formatbot chlist - Lists channels added to FormatBot\n' +
-							'!formatbot promote [id] - Sets user as admin\n' +
-							'!formatbot demote [id] - Removes the user from admins\n' +
-							'!formatbot admins - Lists all the admins of FormatBot' +
-							'!formatbot prset - Sets the project to use for current channel\n' +
-							'!formatbot ahelp - Shows this page\n' +
-							'!formatbot help - Shows user help page');
+						message.reply('CodeBot admin help\n' +
+							'!codebot chadd - Adds the current channel to CodeBot\n' +
+							'!codebot chdel - Removes the current channel from CodeBot\n' +
+							'!codebot chlist - Lists channels added to CodeBot\n' +
+							'!codebot promote [id] - Sets user as admin\n' +
+							'!codebot demote [id] - Removes the user from admins\n' +
+							'!codebot admins - Lists all the admins of CodeBot' +
+							'!codebot prset - Sets the project to use for current channel\n' +
+							'!codebot ahelp - Shows this page\n' +
+							'!codebot help - Shows user help page');
 					}
 				},
 				{
 					name: 'help',
 					cb: () => {
-						message.reply('FormatBot help\n' +
+						message.reply('CodeBot help\n' +
 							'Just send me your code and I\'ll format it and check it for any errors!\n' +
-							'!formatbot help - Shows this page\n' +
-							'!formatbot ahelp - Shows admin help page');
+							'!codebot help - Shows this page\n' +
+							'!codebot ahelp - Shows admin help page');
 					}
 				}
 			];
