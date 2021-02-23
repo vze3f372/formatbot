@@ -1,10 +1,10 @@
 {
-  "name": "formatbot",
-  "version": "1.0.0",
-  "description": "bot for formatting c source code automatically",
-  "main": "index.js",
+  "name": "codebot",
+  "version": "v0.0.1-alpha",
+  "description": "Discord bot for working with C and C++ code",
+  "main": "codebot.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "run": "sudo node ./codebot.js"
   },
   "repository": {
     "type": "git",
@@ -16,13 +16,15 @@
     "format"
   ],
   "author": "Joseph Hotchkiss",
-  "license": "ISC",
+	"contributors": [
+		"Mikhail Stefantsev <mikhail.stefantsev@outlook.com> (https://mstefan99.com/)"
+	],
+	"license": "ISC",
   "bugs": {
     "url": "https://github.com/vze3f372/formatbot/issues"
   },
   "homepage": "https://github.com/vze3f372/formatbot#readme",
   "dependencies": {
-    "discord.js": "^12.5.1",
-    "dotenv": "^8.2.0"
+    "discord.js": "^12.5.1"
   }
 }

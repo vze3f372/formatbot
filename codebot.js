@@ -23,9 +23,11 @@ config.load().then(config => {
 
 	client.on('ready', () => {
 		console.info(`Logged in as CodeBot!`);
-		for (const channelID of config.channels) {
-			client.channels.resolve(channelID)
-				.send(config.welcome[Math.floor(Math.random() * config.welcome.length)]);
+		if (config.welcome.enabled) {
+			for (const channelID of config.channels) {
+				client.channels.resolve(channelID)
+					.send(config.welcome.phrases[Math.floor(Math.random() * config.welcome.phrases.length)]);
+			}
 		}
 	});
 
@@ -111,6 +113,14 @@ config.load().then(config => {
 					}
 				},
 				{
+					name: 'version',
+					cb: () => {
+						configurer('./package.json').load().then(pkg => {
+							message.reply('CodeBot version: ' + pkg.version);
+						});
+					}
+				},
+				{
 					name: 'ahelp',
 					admin: true,
 					cb: () => {
@@ -132,7 +142,8 @@ config.load().then(config => {
 						message.reply('CodeBot help\n' +
 							'Just send me your code and I\'ll format it and check it for any errors!\n' +
 							'!codebot help - Shows this page\n' +
-							'!codebot ahelp - Shows admin help page');
+							'!codebot ahelp - Shows admin help page\n' +
+							'!codebot version - Shows bot version');
 					}
 				}
 			];
@@ -176,7 +187,9 @@ config.load().then(config => {
 							promise = new Promise((resolve, reject) => reject('File type not supported'));
 						}
 					} else {
-						promise = syntaxChecker.checkCode(message.content);
+						promise = fm.cleanDirectory(project.upload)
+							.then(() => fm.saveToFile(project.upload + 'upload.cpp', message.content))
+							.then(() => syntaxChecker.checkProject(project.root));
 					}
 					promise
 						.then(warnings => reply.edit(replyContent +
