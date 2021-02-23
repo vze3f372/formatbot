@@ -21,8 +21,8 @@ configurer.load().then(config => {
 	client.on('ready', () => {
 		console.info(`Logged in as formatbot!`);
 		for(const channelID of config.channels){
-			console.info(`${channelID.id}`);
-			client.channels.resolve(channelID.id).send(config.welcome[Math.floor(Math.random() * config.welcome.length)]);
+			console.info(`${channelID}`);
+			client.channels.resolve(channelID).send(config.welcome[Math.floor(Math.random() * config.welcome.length)]);
 		}
 	});
 
