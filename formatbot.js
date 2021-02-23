@@ -8,17 +8,17 @@ const formatter = require('./lib/formatter');
 const files = require('./lib/file-manager');
 const syntaxChecker = require('./lib/syntax-checker');
 
-const configFile = configurer();
+const config = configurer();
 
-configFile.setDefaults({
+config.defaults = {
 	token: 'your_token_here',
 	admins: [],
 	projects: [],
 	channels: []
-});
+};
 
 
-configFile.load().then(config => {
+config.load().then(config => {
 	client.login(config.token);
 
 	client.on('ready', () => {
@@ -37,9 +37,9 @@ configFile.load().then(config => {
 					cb: () => {
 						if (!config.channels.includes(message.channel.id)) {
 							config.channels.push(message.channel.id);
+							config.save();
+							message.reply('Channel added!');
 						}
-						configFile.save(config);
-						message.reply('Channel added!');
 					}
 				},
 				{
@@ -47,7 +47,7 @@ configFile.load().then(config => {
 					admin: true,
 					cb: () => {
 						config.channels.splice(config.channels.indexOf(message.channel.id));
-						configFile.save(config);
+						config.save();
 						message.reply('Channel removed!');
 					}
 				},
@@ -65,6 +65,8 @@ configFile.load().then(config => {
 					cb: () => {
 						if (!config.admins.includes(words[2])) {
 							config.admins.push(words[2]);
+							config.save();
+							message.reply('User promoted!');
 						}
 					}
 				},
@@ -73,6 +75,27 @@ configFile.load().then(config => {
 					admin: true,
 					cb: () => {
 						config.admins.splice(config.admins.indexOf(words[2]));
+						config.save();
+						message.reply('User demoted!');
+					}
+				},
+				{
+					name: 'prset',
+					admin: true,
+					cb: () => {
+						const project = config.projects.find(p => p.name === words[2]);
+						for (const p of config.projects) {
+							if (p !== project) {
+								p.channels.splice(p.channels.indexOf(message.channel.id));
+							}
+						}
+						if (project) {
+							project.channels.push(message.channel.id);
+							message.reply('Project for this channel is set to "' + project.name + '"!');
+						} else {
+							message.reply('Project not found, using empty project.');
+						}
+						config.save();
 					}
 				},
 				{
@@ -80,7 +103,7 @@ configFile.load().then(config => {
 					admin: true,
 					cb: () => {
 						message.reply('List of FormatBot admins:\n' +
-							config.admins.join('\n'))
+							config.admins.join('\n'));
 					}
 				},
 				{
@@ -113,7 +136,7 @@ configFile.load().then(config => {
 			if (!command) {
 				message.reply('Command not found');
 			} else if (command.admin && !config.admins.includes(message.author.id)) {
-				message.reply('This command requires admin permissions')
+				message.reply('This command requires admin permissions');
 			} else {
 				command.cb();
 			}
