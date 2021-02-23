@@ -5,16 +5,15 @@ const configurer = require('../lib/configurer');
 const config = configurer('./options.json');
 
 
-config.setDefaults({
-	number: 1,
-	string: 'hello',
-	object: {a: 1},
-	null: null
-});
+config.number = 1;
+config.string = 'hello';
+config.object = {a: 1};
+config.array = [1, 2, 3, 5];
 
 
-config.save({})
-	.then(() => {
-		config.load();
-	})
-	.then(options => console.log(options));
+(async () => {
+	await config.load();
+	console.log(config);
+
+	await config.save();
+})();
