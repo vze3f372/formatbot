@@ -29,6 +29,7 @@ configFile.load().then(config => {
 		if (message.author.id === client.user.id) {
 			// Message sent by the bot, ignoring
 		} else if (message.content.startsWith('!formatbot ')) {
+			const words = message.content.match(/\b\w+\b/g);
 			const commands = [
 				{
 					name: 'chadd',
@@ -56,6 +57,22 @@ configFile.load().then(config => {
 					cb: () => {
 						message.reply('List of FormatBot channels:\n' +
 							config.channels.join('\n'));
+					}
+				},
+				{
+					name: 'promote',
+					admin: true,
+					cb: () => {
+						if (!config.admins.includes(words[2])) {
+							config.admins.push(words[2]);
+						}
+					}
+				},
+				{
+					name: 'demote',
+					admin: true,
+					cb: () => {
+						config.admins.splice(config.admins.indexOf(words[2]));
 					}
 				},
 				{
@@ -92,7 +109,6 @@ configFile.load().then(config => {
 					}
 				}
 			];
-			const words = message.content.match(/\b\w+\b/g);
 			const command = commands.find(c => c.name === words[1]);
 			if (!command) {
 				message.reply('Command not found');
