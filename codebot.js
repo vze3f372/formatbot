@@ -1,10 +1,11 @@
 'use strict';
 
+const fs = require('fs');
+
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
 const configurer = require('./lib/configurer');
-const formatter = require('./lib/formatter');
 const fm = require('./lib/file-manager');
 const syntaxChecker = require('./lib/syntax-checker');
 
@@ -22,7 +23,7 @@ config.load().then(config => {
 	client.login(config.token);
 
 	client.on('ready', () => {
-		console.info(`Logged in as CodeBot!`);
+		console.info('Logged in as CodeBot!');
 		if (config.welcome.enabled) {
 			for (const channelID of config.channels) {
 				client.channels.resolve(channelID)
@@ -97,7 +98,7 @@ config.load().then(config => {
 						}
 						if (project) {
 							project.channels.push(message.channel.id);
-							message.reply('Project for this channel is set to "' + project.name + '"!');
+							message.reply('Project for this channel is set to ' + project.name + '!');
 						} else {
 							message.reply('Project not found, using empty project.');
 						}
@@ -159,50 +160,48 @@ config.load().then(config => {
 			// Channel not added, ignoring
 		} else {
 			const attachments = message.attachments.array();
-			message.channel.send('Working, please wait...', attachments).then(reply => {
-				formatter.format(message.content).then(code => {
-					const replyContent =
-						'<@' + message.author.id + '>,' +
-						'```cpp\n' +
-						code + '\n' +
-						'```\n';
-					reply.edit(replyContent + 'Building...');
+			message.channel.send('Building, please wait...', attachments).then(reply => {
+				let promise;
+				const project = config.projects.find(p => p.channels.includes(message.channel.id)) ??
+					config.projects.find(p => p.name === 'empty');
 
-					let promise;
-					const project = config.projects.find(p => p.channels.includes(message.channel.id)) ??
-						config.projects.find(p => p.name === 'empty');
+				if (attachments.length) {
+					const sourceFile = attachments.find(a => a.url.match(/.*\.c(pp)?$/));
+					const sourceArchive = attachments.find(a => a.url.match(/.*\.zip$/));
 
-					if (attachments.length) {
-						const sourceFile = attachments.find(a => a.url.match(/.*\.c(pp)?$/));
-						const sourceArchive = attachments.find(a => a.url.match(/.*\.zip$/));
-
-						if (sourceFile) {
-							promise = fm.cleanDirectory(project.upload)
-								.then(() => fm.downloadFile(sourceFile.url, project.upload))
-								.then(() => syntaxChecker.checkProject(project.root));
-						} else if (sourceArchive) {
-							// download, unarchive, build
-							promise = new Promise((resolve, reject) => reject('Archives are not yet supported'));
-						} else {
-							promise = new Promise((resolve, reject) => reject('File type not supported'));
-						}
-					} else {
-						promise = fm.cleanDirectory(project.upload)
-							.then(() => fm.saveToFile(project.upload + 'upload.cpp', message.content))
+					promise = fm.cleanDirectory(project.upload)
+						.then(() => fm.cleanDirectory(config.tempDir));
+					if (sourceFile) {
+						promise = promise
+							.then(() => fm.downloadFile(sourceFile.url, project.upload))
 							.then(() => syntaxChecker.checkProject(project.root));
+					} else if (sourceArchive) {
+						promise = promise
+							.then(() => fm.cleanDirectory(project.upload))
+							.then(() => fm.downloadFile(sourceArchive.url, config.tempDir))
+							.then(() => fm.unArchive(config.tempDir + sourceArchive.name, project.upload))
+							.then(() => syntaxChecker.checkProject(project.root));
+					} else {
+						promise = new Promise((resolve, reject) => reject('File type not supported'));
 					}
-					promise
-						.then(warnings => reply.edit(replyContent +
-							':white_check_mark:  Build successful! Warnings:\n' + (warnings || 'None!')))
-						.catch(err => reply.edit(replyContent + ':no_entry:  Build failed:\n' + err));
-				})
-					.catch(err => reply.edit('<@' + message.author.id + '>, Your message: \n"' +
-						message.content + '"\n' +
-						':warning:  Could not be formatted!\n' +
-						'Reason: ' + err))
-					.then(() => message.delete());
-			});
+				} else {
+					promise = promise
+						.then(() => fm.saveToFile(project.upload + 'upload.cpp', message.content))
+						.then(() => syntaxChecker.checkProject(project.root));
+				}
+				const archivePath = config.tempDir + 'CodeBot.zip';
+				promise
+					.then(warnings => fm.saveToFile(project.upload + 'warnings.txt', warnings))
+					.catch(err => fm.saveToFile(project.upload + 'errors.txt', err))
+					.then(() => fm.saveToFile(project.upload + 'message.txt', message.content))
+					.then(() => fm.archive(project.upload, archivePath))
+					.then(() => message.channel.send('<@' + message.author.id + '>,\n' +
+						'See attached file for detailed output.',
+						new Discord.MessageAttachment(fs.createReadStream(archivePath))
+					))
+					.finally(() => reply.delete());
+			})
+				.finally(() => message.delete());
 		}
 	});
 });
-
