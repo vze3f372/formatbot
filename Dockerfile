@@ -18,11 +18,11 @@ RUN apt-get -y  install\
 RUN useradd -u 1500 bot
 #Manage the pre-build PSoC Zumo Project
 RUN git clone https://github.com/vze3f372/zumoPreBuilt.git
+RUN mkdir -p ./projects/zumo/upload ./projects/empty/upload
 RUN cp -r ./zumoPreBuilt/* ./projects/zumo
 #RUN rm -rf ./zumoPreBuilt
 #Set folder permissions to limit the bots write access to only required directories
 RUN chmod ug+rx ./*
-RUN mkdir -p ./projects/zumo/upload ./projects/empty/upload
 RUN chmod gu+rwx ./projects/*/upload
 #install Node libraries
 RUN npm install
