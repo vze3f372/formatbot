@@ -161,16 +161,17 @@ config.load().then(config => {
 		} else {
 			const attachments = message.attachments.array();
 			message.channel.send('Building, please wait...', attachments).then(reply => {
-				let promise;
+				let promise = new Promise(resolve => resolve());
 				const project = config.projects.find(p => p.channels.includes(message.channel.id)) ??
 					config.projects.find(p => p.name === 'empty');
+
+				promise = promise
+					.then(() => fm.cleanDirectory(project.upload))
+					.then(() => fm.cleanDirectory(config.tempDir));
 
 				if (attachments.length) {
 					const sourceFile = attachments.find(a => a.url.match(/.*\.c(pp)?$/));
 					const sourceArchive = attachments.find(a => a.url.match(/.*\.zip$/));
-
-					promise = fm.cleanDirectory(project.upload)
-						.then(() => fm.cleanDirectory(config.tempDir));
 					if (sourceFile) {
 						promise = promise
 							.then(() => fm.downloadFile(sourceFile.url, project.upload))
@@ -205,3 +206,8 @@ config.load().then(config => {
 		}
 	});
 });
+
+
+function processCode(message) {
+
+}
