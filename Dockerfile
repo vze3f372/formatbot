@@ -27,6 +27,6 @@ RUN chmod gu+rwx ./projects/*/upload
 #install Node libraries
 RUN npm install
 #execute command to start the bot
-CMD [ "node", "formatbot.js" ]
+CMD [ "node", "codebot.js" ]
 #After building the image you can run it as a background proces with the command: 
 #'docker run -d --restart unless-stopped node-docker' from the terminal...
