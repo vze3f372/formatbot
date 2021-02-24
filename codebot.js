@@ -44,9 +44,11 @@ config.load().then(config => {
 			// Channel not added, ignoring
 		} else {
 			message.channel.send('Building, please wait...').then(reply => {
+				message.channel.startTyping(1);
 				processCode(message)
 					.finally(() => reply.delete());
-			}).finally(() => message.delete());
+			}).finally(() => message.delete())
+				.finally(() => message.channel.stopTyping(true));
 		}
 	});
 
