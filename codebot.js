@@ -45,7 +45,7 @@ config.load().then(config => {
 		} else {
 			message.channel.send('Building, please wait...').then(reply => {
 				message.channel.startTyping(1);
-				processCode(message)
+				return processCode(message)
 					.finally(() => reply.delete());
 			}).finally(() => message.delete())
 				.finally(() => message.channel.stopTyping(true));
