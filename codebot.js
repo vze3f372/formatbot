@@ -7,6 +7,7 @@ const client = new Discord.Client();
 
 const configurer = require('./lib/configurer');
 const fm = require('./lib/file-manager');
+const formatter = require('./lib/formatter');
 const syntaxChecker = require('./lib/syntax-checker');
 
 const config = configurer();
@@ -204,7 +205,9 @@ config.load().then(config => {
 		} else {
 			promise = promise
 				.then(() => fm.saveToFile(project.upload + 'upload.cpp', message.content))
-				.then(() => syntaxChecker.checkProject(project.root));
+				.then(() => syntaxChecker.checkProject(project.root))
+				.then(() => formatter.format(message.content))
+				.then(formattedCode => message.content = formattedCode);
 		}
 		return reply(message, project, promise);
 	}
@@ -212,17 +215,51 @@ config.load().then(config => {
 
 	function reply(message, project, promise) {
 		const archivePath = config.tempDir + 'CodeBot.zip';
+		let buildStatus = 'failed';
+
 		return promise
-			.then(warnings => warnings? fm.saveToFile(project.upload + 'warnings.txt',
-				warnings) : null)
-			.catch(err => err? fm.saveToFile(project.upload + 'errors.txt',
-				err) : null)
+			.then(warnings => {
+				if (warnings) {
+					fm.saveToFile(project.upload + 'warnings.txt', warnings);
+					buildStatus = 'warnings';
+				} else {
+					buildStatus = 'ok';
+				}
+			})
+			.catch(err => {
+				if (err) {
+					fm.saveToFile(project.upload + 'errors.txt', err);
+				}
+			})
 			.then(() => message.content? fm.saveToFile(project.upload + 'message.txt',
 				message.content) : null)
 			.then(() => fm.archive(project.upload, archivePath))
-			.then(() => message.channel.send('<@' + message.author.id + '>,\n' +
-				'See attached file for detailed output.',
-				new Discord.MessageAttachment(fs.createReadStream(archivePath))
-			));
+			.then(() => {
+				let messageText = '<@' + message.author.id + '>, here are the build results for your message:\n';
+				if (message.content.length < 1500) {
+					if (message.attachments.size) {
+						messageText += '"' + message.content + '"\n';
+					} else {
+						messageText += '```cpp\n' + message.content + '\n```\n';
+					}
+				} else {
+					messageText += '[too long, see archive]\n';
+				}
+				switch (buildStatus) {
+					case 'failed':
+						messageText += ':no_entry:  Build failed\n';
+						break;
+					case 'warnings':
+						messageText += ':warning:  Build succeeded with warnings\n';
+						break;
+					case 'ok':
+						messageText += ':white_check_mark:  Build succeeded, no warnings!\n';
+						break;
+				}
+				messageText += 'See attached archive for details';
+
+				message.channel.send(messageText,
+					new Discord.MessageAttachment(fs.createReadStream(archivePath)));
+			});
 	}
 });
