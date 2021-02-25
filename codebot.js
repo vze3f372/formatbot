@@ -207,9 +207,9 @@ config.load().then(config => {
 		} else {
 			promise = promise
 				.then(() => fm.saveToFile(project.upload + 'upload.cpp', message.content))
-				.then(() => syntaxChecker.checkProject(project.root))
 				.then(() => formatter.format(message.content))
-				.then(formattedCode => message.content = formattedCode);
+				.then(formattedCode => message.content = formattedCode)
+				.then(() => syntaxChecker.checkProject(project.root));
 		}
 		return reply(message, project, promise);
 	}
@@ -230,7 +230,7 @@ config.load().then(config => {
 			})
 			.catch(err => {
 				if (err) {
-					fm.saveToFile(project.upload + 'errors.txt', err);
+					fm.saveToFile(project.upload + 'errors.txt', err.toString());
 				}
 			})
 			.then(() => message.content? fm.saveToFile(project.upload + 'message.txt',
