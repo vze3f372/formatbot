@@ -16,10 +16,10 @@
     "format"
   ],
   "author": "Joseph Hotchkiss",
-	"contributors": [
-		"Mikhail Stefantsev <mikhail.stefantsev@outlook.com> (https://mstefan99.com/)"
-	],
-	"license": "ISC",
+  "contributors": [
+    "Mikhail Stefantsev <mikhail.stefantsev@outlook.com> (https://mstefan99.com/)"
+  ],
+  "license": "ISC",
   "bugs": {
     "url": "https://github.com/vze3f372/formatbot/issues"
   },
