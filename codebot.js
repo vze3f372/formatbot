@@ -11,6 +11,7 @@ const formatter = require('./lib/formatter');
 const syntaxChecker = require('./lib/syntax-checker');
 
 const config = configurer();
+let jobPromise = Promise.resolve();
 
 config.defaults = {
 	token: 'your_token_here',
@@ -43,12 +44,8 @@ config.load().then(config => {
 		} else if (!config.channels.includes(message.channel.id)) {
 			// Channel not added, ignoring
 		} else {
-			message.channel.send('Building, please wait...').then(reply => {
-				message.channel.startTyping(1);
-				return processCode(message)
-					.finally(() => reply.delete());
-			}).finally(() => message.delete())
-				.finally(() => message.channel.stopTyping(true));
+			jobPromise = jobPromise
+				.then(() => processMessage(message));
 		}
 	});
 
@@ -177,8 +174,20 @@ config.load().then(config => {
 	}
 
 
+	function processMessage(message) {
+		return message.channel.send('Building, please wait...')
+			.then(reply => {
+				message.channel.startTyping(1);
+				processCode(message)
+					.finally(() => reply.delete());
+			})
+			.finally(() => message.delete())
+			.finally(() => message.channel.stopTyping(true));
+	}
+
+
 	function processCode(message) {
-		let promise = new Promise(resolve => resolve());
+		let promise = Promise.resolve();
 		const project = config.projects.find(p => p.channels.includes(message.channel.id)) ??
 			config.projects.find(p => p.name === 'empty');
 
@@ -202,7 +211,7 @@ config.load().then(config => {
 					.then(() => syntaxChecker.checkProject(project.root));
 			} else {
 				promise = promise
-					.then(() => new Promise((resolve, reject) => reject('File type not supported')));
+					.then(() => Promise.reject('File type not supported'));
 			}
 		} else {
 			promise = promise
@@ -218,10 +227,12 @@ config.load().then(config => {
 	function reply(message, project, promise) {
 		const archivePath = config.tempDir + 'CodeBot.zip';
 		let buildStatus = 'failed';
+		let output = '';
 
 		return promise
 			.then(warnings => {
 				if (warnings) {
+					output = warnings;
 					fm.saveToFile(project.upload + 'warnings.txt', warnings);
 					buildStatus = 'warnings';
 				} else {
@@ -230,6 +241,7 @@ config.load().then(config => {
 			})
 			.catch(err => {
 				if (err) {
+					output = err.toString();
 					fm.saveToFile(project.upload + 'errors.txt', err.toString());
 				}
 			})
@@ -237,8 +249,8 @@ config.load().then(config => {
 				message.content) : null)
 			.then(() => fm.archive(project.upload, archivePath))
 			.then(() => {
-				let messageText = '<@' + message.author.id + '>, here are the build results for your message:\n';
-				if (message.content.length < 1500) {
+				let messageText = '<@' + message.author.id + '>, your message:\n';
+				if (message.content.length < 1000) {
 					if (message.attachments.size) {
 						messageText += '"' + message.content + '"\n';
 					} else {
@@ -247,6 +259,7 @@ config.load().then(config => {
 				} else {
 					messageText += '[too long, see archive]\n';
 				}
+				messageText += 'Has been built. Build results:\n';
 				switch (buildStatus) {
 					case 'failed':
 						messageText += ':no_entry:  Build failed\n';
@@ -258,9 +271,16 @@ config.load().then(config => {
 						messageText += ':white_check_mark:  Build succeeded, no warnings!\n';
 						break;
 				}
-				messageText += 'See attached archive for details';
+				if (output.length) {
+					if (output.length < 500) {
+						messageText += 'Build output: "' + output + '"\n';
+					} else {
+						messageText += 'Build output too long, see archive.\n';
+					}
+				}
+				messageText += 'See attached archive for more details';
 
-				message.channel.send(messageText,
+				return message.channel.send(messageText,
 					new Discord.MessageAttachment(fs.createReadStream(archivePath)));
 			});
 	}
