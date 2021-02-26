@@ -12,6 +12,7 @@ const syntaxChecker = require('./lib/syntax-checker');
 
 const config = configurer();
 let jobPromise = Promise.resolve();
+const commandPrefix = '!codebot';
 
 config.defaults = {
 	token: 'your_token_here',
@@ -39,7 +40,7 @@ config.load().then(config => {
 	client.on('message', message => {
 		if (message.author.id === client.user.id) {
 			// Message sent by the bot, ignoring
-		} else if (message.content.startsWith('!codebot ')) {
+		} else if (message.content.startsWith(commandPrefix)) {
 			handleCommands(message);
 		} else if (!config.channels.includes(message.channel.id)) {
 			// Channel not added, ignoring
@@ -56,6 +57,7 @@ config.load().then(config => {
 			{
 				name: 'chadd',
 				admin: true,
+				help: 'Adds the current channel to CodeBot',
 				cb: () => {
 					if (!config.channels.includes(message.channel.id)) {
 						config.channels.push(message.channel.id);
@@ -65,45 +67,9 @@ config.load().then(config => {
 				}
 			},
 			{
-				name: 'chdel',
-				admin: true,
-				cb: () => {
-					config.channels.splice(config.channels.indexOf(message.channel.id));
-					config.save();
-					message.reply('Channel removed!');
-				}
-			},
-			{
-				name: 'chlist',
-				admin: true,
-				cb: () => {
-					message.reply('List of CodeBot channels:\n' +
-						config.channels.join('\n'));
-				}
-			},
-			{
-				name: 'promote',
-				admin: true,
-				cb: () => {
-					if (!config.admins.includes(words[2])) {
-						config.admins.push(words[2]);
-						config.save();
-						message.reply('User promoted!');
-					}
-				}
-			},
-			{
-				name: 'demote',
-				admin: true,
-				cb: () => {
-					config.admins.splice(config.admins.indexOf(words[2]));
-					config.save();
-					message.reply('User demoted!');
-				}
-			},
-			{
 				name: 'prset',
 				admin: true,
+				help: 'Sets the project to use for current channel',
 				cb: () => {
 					const project = config.projects.find(p => p.name === words[2]);
 					for (const p of config.projects) {
@@ -121,8 +87,52 @@ config.load().then(config => {
 				}
 			},
 			{
+				name: 'chdel',
+				admin: true,
+				help: 'Removes the current channel from CodeBot',
+				cb: () => {
+					config.channels.splice(config.channels.indexOf(message.channel.id));
+					config.save();
+					message.reply('Channel removed!');
+				}
+			},
+			{
+				name: 'chlist',
+				admin: true,
+				help: 'Lists channels added to CodeBot',
+				cb: () => {
+					message.reply('List of CodeBot channels:\n' +
+						config.channels.join('\n'));
+				}
+			},
+			{
+				name: 'promote',
+				admin: true,
+				args: ['id'],
+				help: 'Sets user as admin',
+				cb: () => {
+					if (!config.admins.includes(words[2])) {
+						config.admins.push(words[2]);
+						config.save();
+						message.reply('User promoted!');
+					}
+				}
+			},
+			{
+				name: 'demote',
+				admin: true,
+				args: ['id'],
+				help: 'Removes the user from admins',
+				cb: () => {
+					config.admins.splice(config.admins.indexOf(words[2]));
+					config.save();
+					message.reply('User demoted!');
+				}
+			},
+			{
 				name: 'admins',
 				admin: true,
+				help: 'Lists all the admins of CodeBot',
 				cb: () => {
 					message.reply('List of CodeBot admins:\n' +
 						config.admins.join('\n'));
@@ -130,6 +140,7 @@ config.load().then(config => {
 			},
 			{
 				name: 'version',
+				help: 'Shows bot version',
 				cb: () => {
 					configurer('./package.json').load().then(pkg => {
 						message.reply('CodeBot version: ' + pkg.version);
@@ -139,27 +150,30 @@ config.load().then(config => {
 			{
 				name: 'ahelp',
 				admin: true,
+				help: 'Shows an admin help page',
 				cb: () => {
-					message.reply('CodeBot admin help\n' +
-						'!codebot chadd - Adds the current channel to CodeBot\n' +
-						'!codebot chdel - Removes the current channel from CodeBot\n' +
-						'!codebot chlist - Lists channels added to CodeBot\n' +
-						'!codebot promote [id] - Sets user as admin\n' +
-						'!codebot demote [id] - Removes the user from admins\n' +
-						'!codebot admins - Lists all the admins of CodeBot' +
-						'!codebot prset - Sets the project to use for current channel\n' +
-						'!codebot ahelp - Shows this page\n' +
-						'!codebot help - Shows user help page');
+					let commandsDesc = '**CodeBot admin help**\n';
+					for (const command of commands) {
+						commandsDesc += commandPrefix + ' ' + command.name + ' '
+							+ (command.args? '[' + command.args.join(', ') + ']' : '') +
+							' - ' + command.help + '\n';
+					}
+					message.reply(commandsDesc);
 				}
 			},
 			{
 				name: 'help',
+				help: 'Shows a help page',
 				cb: () => {
-					message.reply('CodeBot help\n' +
+					let commandsDesc = '**CodeBot help**\n' +
 						'Just send me your code and I\'ll format it and check it for any errors!\n' +
-						'!codebot help - Shows this page\n' +
-						'!codebot ahelp - Shows admin help page\n' +
-						'!codebot version - Shows bot version');
+						'I can read your code in the chat or you can send me your `.c`, `.cpp` or `.zip` files with code!\n';
+					for (const command of commands.filter(c => !c.admin)) {
+						commandsDesc += commandPrefix + ' ' + command.name + ' '
+							+ (command.args? '[' + command.args.join(', ') + ']' : '') +
+							' - ' + command.help + '\n';
+					}
+					message.reply(commandsDesc);
 				}
 			}
 		];

@@ -1,6 +1,6 @@
 {
   "name": "codebot",
-  "version": "v0.0.2-alpha",
+  "version": "v0.1.0-beta",
   "description": "Discord bot for working with C and C++ code",
   "main": "codebot.js",
   "scripts": {
