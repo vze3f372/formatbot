@@ -12,13 +12,17 @@ const syntaxChecker = require('./lib/syntax-checker');
 
 const config = configurer();
 let jobPromise = Promise.resolve();
-const commandPrefix = '!codebot';
 
 config.defaults = {
 	token: 'your_token_here',
 	admins: [],
 	projects: [],
-	channels: []
+	channels: [],
+	welcome: {
+		enabled: false
+	},
+	tempDir: './projects/temp/',
+	commandPrefix: '!codebot'
 };
 
 
@@ -40,7 +44,7 @@ config.load().then(config => {
 	client.on('message', message => {
 		if (message.author.id === client.user.id) {
 			// Message sent by the bot, ignoring
-		} else if (message.content.startsWith(commandPrefix)) {
+		} else if (message.content.startsWith(config.commandPrefix)) {
 			handleCommands(message);
 		} else if (!config.channels.includes(message.channel.id)) {
 			// Channel not added, ignoring
@@ -87,6 +91,15 @@ config.load().then(config => {
 				}
 			},
 			{
+				name: 'project',
+				admin: true,
+				help: 'Shows the project set in the current channel',
+				cb: () => {
+					message.reply('The project in the current channel is set to "' +
+						(config.projects.find(p => p.channels.includes(message.channel.id))?.name ?? 'empty') + '"');
+				}
+			},
+			{
 				name: 'chdel',
 				admin: true,
 				help: 'Removes the current channel from CodeBot',
@@ -97,7 +110,7 @@ config.load().then(config => {
 				}
 			},
 			{
-				name: 'chlist',
+				name: 'channels',
 				admin: true,
 				help: 'Lists channels added to CodeBot',
 				cb: () => {
@@ -154,7 +167,7 @@ config.load().then(config => {
 				cb: () => {
 					let commandsDesc = '**CodeBot admin help**\n';
 					for (const command of commands) {
-						commandsDesc += commandPrefix + ' ' + command.name + ' '
+						commandsDesc += config.commandPrefix + ' ' + command.name + ' '
 							+ (command.args? '[' + command.args.join(', ') + ']' : '') +
 							' - ' + command.help + '\n';
 					}
@@ -169,7 +182,7 @@ config.load().then(config => {
 						'Just send me your code and I\'ll format it and check it for any errors!\n' +
 						'I can read your code in the chat or you can send me your `.c`, `.cpp` or `.zip` files with code!\n';
 					for (const command of commands.filter(c => !c.admin)) {
-						commandsDesc += commandPrefix + ' ' + command.name + ' '
+						commandsDesc += config.commandPrefix + ' ' + command.name + ' '
 							+ (command.args? '[' + command.args.join(', ') + ']' : '') +
 							' - ' + command.help + '\n';
 					}
@@ -192,7 +205,7 @@ config.load().then(config => {
 		return message.channel.send('Building, please wait...')
 			.then(reply => {
 				message.channel.startTyping(1);
-				processCode(message)
+				return processCode(message)
 					.finally(() => reply.delete());
 			})
 			.finally(() => message.delete())
