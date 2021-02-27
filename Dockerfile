@@ -1,19 +1,26 @@
 # specify the node base image with your desired version node: Ubuntu Dev Current
-FROM node:current-stretch
+FROM ubuntu:18.04
 # replace this with your application's default port
-
+RUN bash
 #create working directory for the container
 WORKDIR /app
 #Copy all files and directories from the project dir into container workdir
 COPY . .
 #Update apt and install required packages
+#RUN curl -sL https://deb.nodesource.com/setup_14.x | sudo bash -
 RUN apt-get update
 RUN apt-get -y  install\
         apt-utils\
         clang\
         clang-format\
         build-essential\
-        git zip
+        git\
+		zip\
+		sudo\
+		curl
+RUN curl -fsSL https://deb.nodesource.com/setup_15.x | sudo -E bash -
+RUN apt-get install -y nodejs
+
 #Create a user and group for the bot to run
 RUN useradd -u 1500 bot
 #Manage the pre-build PSoC Zumo Project
