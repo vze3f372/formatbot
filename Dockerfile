@@ -31,7 +31,7 @@ RUN cp -r ./zumoPreBuilt/* ./projects/zumo/
 #Set folder permissions to limit the bots write access to only required directories
 RUN chown -R 1500:1500 ./*
 RUN chmod ug+rx ./*
-RUN chmod ug+rwx ./projects/*/upload/
+RUN chmod ug+rwx ./projects/*/upload/ ./projects/temp/
 #install Node libraries
 RUN npm install
 #execute command to start the bot
