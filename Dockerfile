@@ -1,9 +1,6 @@
 # specify the node base image with your desired version node: Ubuntu Dev Current
 FROM ubuntu:18.04
-<<<<<<< HEAD
 # replace this with your application's default port
-=======
->>>>>>> Updated Dockerfile
 RUN bash
 #create working directory for the container
 WORKDIR /app
@@ -28,7 +25,7 @@ RUN apt-get install -y nodejs
 #Create a user and group for the bot to run
 RUN useradd -u 1500 bot
 #Manage the pre-build PSoC Zumo Project
-RUN mkdir -p ./projects/zumo/upload ./projects/empty/upload
+RUN mkdir -p ./projects/zumo/upload/ ./projects/empty/upload/ ./projects/temp/
 RUN git clone https://github.com/vze3f372/zumoPreBuilt.git
 RUN cp -r ./zumoPreBuilt/* ./projects/zumo
 #RUN rm -rf ./zumoPreBuilt
