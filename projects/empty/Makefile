@@ -8,6 +8,6 @@ TARGET   = testapp
 all: $(TARGET)
 
 $(TARGET): $(OBJFILES)
-	$(CC) $(CFLAGS) $(SOURCE) $(LDFLAGS)
 	$(FORMAT) $(FFLAGS) $(SOURCE)
+	$(CC) $(CFLAGS) $(SOURCE) $(LDFLAGS)
 
