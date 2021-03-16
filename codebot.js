@@ -48,6 +48,8 @@ config.load().then(config => {
 			handleCommands(message);
 		} else if (!config.channels.includes(message.channel.id)) {
 			// Channel not added, ignoring
+		} else if (!message.content.match(/{(.|\n)*?}/)) {
+			// Message does not contain code, ignoring
 		} else {
 			jobPromise = jobPromise
 				.then(() => processMessage(message));
@@ -152,6 +154,14 @@ config.load().then(config => {
 				}
 			},
 			{
+				name: 'clean',
+				admin: true,
+				help: 'Deletes last 100 messages in the chat',
+				cb: () => {
+					message.channel.bulkDelete(100);
+				}
+			},
+			{
 				name: 'version',
 				help: 'Shows bot version',
 				cb: () => {
@@ -191,7 +201,9 @@ config.load().then(config => {
 			}
 		];
 		const command = commands.find(c => c.name === words[1]);
-		if (!command) {
+		if (!words[1]) {
+			message.reply('Please type ' + config.commandPrefix + ' help for usage info.')
+		} else if (!command) {
 			message.reply('Command not found');
 		} else if (command.admin && !config.admins.includes(message.author.id)) {
 			message.reply('This command requires admin permissions');
