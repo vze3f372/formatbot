@@ -10,7 +10,8 @@ const fm = require('./lib/file-manager');
 const formatter = require('./lib/formatter');
 const syntaxChecker = require('./lib/syntax-checker');
 
-const config = configurer();
+const args = process.argv.slice(2);
+const config = configurer(args[0]);
 let jobPromise = Promise.resolve();
 
 config.defaults = {
