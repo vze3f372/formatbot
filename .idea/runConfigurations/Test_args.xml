@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Test args" type="NodeJSConfigurationType" folderName="Test" application-parameters="-v -s 1 -d 1 2 path.txt somethingElse" path-to-js-file="test/arguments.js" working-dir="$PROJECT_DIR$">
+    <method v="2" />
+  </configuration>
+</component>

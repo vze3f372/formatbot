@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Run" type="NodeJSConfigurationType" path-to-node="wsl://Ubuntu-20.04@/usr/bin/node" path-to-js-file="$PROJECT_DIR$/codebot.js" working-dir="$PROJECT_DIR$">
+  <configuration default="false" name="Run" type="NodeJSConfigurationType" application-parameters="-c ./config.json" path-to-node="node" path-to-js-file="codebot.js" working-dir="$PROJECT_DIR$">
     <method v="2" />
   </configuration>
 </component>

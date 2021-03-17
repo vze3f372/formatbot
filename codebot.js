@@ -6,12 +6,17 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 
 const configurer = require('./lib/configurer');
+const argumented = require('./lib/argumented');
 const fm = require('./lib/file-manager');
 const formatter = require('./lib/formatter');
 const syntaxChecker = require('./lib/syntax-checker');
 
-const args = process.argv.slice(2);
-const config = configurer(args[0]);
+
+argumented.description('A bot for formatting and checking C and C++ code');
+argumented.add('config', ['-c', '--config'], 'filePath',
+	'The location of the config file');
+const args = argumented.parse();
+const config = configurer(args.config);
 let jobPromise = Promise.resolve();
 
 config.defaults = {
