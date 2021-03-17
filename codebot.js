@@ -48,8 +48,9 @@ config.load().then(config => {
 			handleCommands(message);
 		} else if (!config.channels.includes(message.channel.id)) {
 			// Channel not added, ignoring
-		} else if (!message.content.match(/{(.|\n)*?}/)) {
-			// Message does not contain code, ignoring
+		} else if (!message.content.match(/{(.|\n)*?}/)
+			&& !message.attachments.array().find(a => a.url.match(/.*\.(?:(?:c(?:pp)?)|(?:zip))?$/))) {
+			// Message does not contain code or source files, ignoring
 		} else {
 			jobPromise = jobPromise
 				.then(() => processMessage(message));
@@ -158,7 +159,7 @@ config.load().then(config => {
 				admin: true,
 				help: 'Deletes last 100 messages in the chat',
 				cb: () => {
-					message.channel.bulkDelete(100);
+					message.channel.bulkDelete(100, true);
 				}
 			},
 			{
@@ -249,6 +250,7 @@ config.load().then(config => {
 					.then(() => fm.unArchive(config.tempDir + sourceArchive.name, project.upload))
 					.then(() => syntaxChecker.checkProject(project.root));
 			} else {
+				// Shouldn't get here after attachment check
 				promise = promise
 					.then(() => Promise.reject('File type not supported'));
 			}
