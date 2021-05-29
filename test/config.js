@@ -1,6 +1,6 @@
 'use strict';
 
-const configurer = require('../lib/configurer');
+const configurer = require('configurer');
 
 const config = configurer('./options.json');
 

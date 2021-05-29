@@ -1,6 +1,6 @@
 'use strict';
 
-const argumented = require('../lib/argumented');
+const argumented = require('argumented');
 
 argumented.description('Test script');
 argumented.add('verbose', '-v', null, 'verbose');

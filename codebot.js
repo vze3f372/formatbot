@@ -5,8 +5,8 @@ const fs = require('fs');
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
-const configurer = require('./lib/configurer');
-const argumented = require('./lib/argumented');
+const configurer = require('configurer');
+const argumented = require('argumented');
 const fm = require('./lib/file-manager');
 const formatter = require('./lib/formatter');
 const syntaxChecker = require('./lib/syntax-checker');
