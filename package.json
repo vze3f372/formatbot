@@ -25,8 +25,8 @@
   },
   "homepage": "https://github.com/vze3f372/formatbot#readme",
   "dependencies": {
-    "argumented": "^1.0.0",
-    "configurer": "^1.0.0",
+    "@mstefan99/argumented": "^1.0.0",
+    "@mstefan99/configurer": "^1.0.0",
     "discord.js": "^12.5.1"
   }
 }
